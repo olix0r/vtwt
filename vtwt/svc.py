@@ -7,7 +7,7 @@ from jersey import log
 
 from twittytwister.twitter import TwitterFeed
 
-from vtwt.util import decodeText
+from vtwt.util import recodeText
 
 
 
@@ -32,7 +32,7 @@ class VtwtService(Service):
         messages = []
         yield self._twt.home_timeline(lambda m: messages.insert(0, m), params)
         for msg in messages:
-            msg.text = decodeText(msg.text)
+            msg.text = recodeText(msg.text)
             self._mostRecentId = msg.id
 
         returnValue(messages)
