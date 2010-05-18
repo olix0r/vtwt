@@ -60,6 +60,10 @@ class VtwtService(Service):
         return self._twt.block(user)
 
 
+    def unblock(self, user):
+        return self._twt.unblock(user)
+
+
     @inlineCallbacks
     def getFollowers(self, user=None):
         followers = []
