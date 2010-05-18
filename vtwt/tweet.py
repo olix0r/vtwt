@@ -20,10 +20,10 @@ class Tweeter(cli.Command):
     def execute(self):
         text = self.config["tweet"]
         try:
-            msg = yield self.vtwt.update(text)
+            msgId = yield self.vtwt.tweet(text)
+            print "{0}\t{1}".format(self.config.parent["user"], text)
         except Exception, e:
             log.error(str(e))
-        print "{0}\t{1}".format(self.config.parent["user"], text)
 
 
 
