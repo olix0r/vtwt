@@ -1,3 +1,6 @@
+import sys
+
+from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
@@ -13,8 +16,14 @@ class FollowingOptions(cli.Options):
 
 class Following(cli.Command):
 
+    @inlineCallbacks
     def execute(self):
-        return self.vtwt.getFollowees().addCallback(self._printFriends)
+        try:
+            friends = yield self.vtwt.getFollowees()
+            self._printFriends(friends)
+
+        except Exception, e:
+            print >>sys.stderr, repr(e)
 
 
     def _printFriends(self, friends):
