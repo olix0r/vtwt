@@ -19,14 +19,20 @@ class BlockOptions(cli.Options):
 
 class Blocker(cli.Command):
 
+    @inlineCallbacks
     def execute(self):
-        return gatherResults(map(self._block, self.config["blockees"]))
+        for blockee in self.config["blockees"]:
+            try:
+                yield self._block(blockee)
+
+            except Exception, e:
+                print >>sys.stderr, repr(e)
+
 
     @inlineCallbacks
     def _block(self, user):
-        print "blocking: {0}".format(user)
         yield self.vtwt.block(user)
-        print "{0} blocked {1}".format(self.config["user"], user)
+        print "{0}".format(user)
 
 
 

@@ -1,3 +1,6 @@
+import os, sys
+
+from twisted.internet.defer import inlineCallbacks
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
@@ -7,19 +10,29 @@ from vtwt import cli
 
 class UnFollowOptions(cli.Options):
 
-    def parseArgs(self, name):
-        self["friend"] = name
+    def parseArgs(self, *names):
+        if not names:
+            raise usage.error("No one to unfollow ;(")
+        self["losers"] = names
 
 
 class UnFollower(cli.Command):
 
+    @inlineCallbacks
     def execute(self):
-        return self.vtwt.unfollow(self.config["friend"]
-                ).addCallback(self._befriended)
+        users = []
+        for loser in self.config["losers"]:
+            try:
+                user = yield self.vtwt.unfollow(loser)
+                self._printLoser(loser)
+
+            except Exception, e:
+                print >>sys.stderr, repr(e)
 
 
-    def _befriended(self, user):
-        print "Un-following: {0.screen_name}".format(user)
+    def _printLoser(self, user):
+        print "{u}".format(c=self.config, u=user)
+
 
 
 
