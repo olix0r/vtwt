@@ -1,10 +1,8 @@
-from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
-from twittytwister.twitter import Twitter
-
-from jersey import cli
+from jersey import log
+from vtwt import cli
 
 
 class UnFollowOptions(cli.Options):
@@ -15,13 +13,9 @@ class UnFollowOptions(cli.Options):
 
 class UnFollower(cli.Command):
 
-    @inlineCallbacks
     def execute(self):
-        twt = Twitter(self.config.parent["user"], self.config.parent["password"])
-        try:
-            yield twt.unfollow_user(self.config["friend"], self._befriended)
-        except Exception, e:
-            log.error(repr(e))
+        return self.vtwt.unfollow(self.config["friend"]
+                ).addCallback(self._befriended)
 
 
     def _befriended(self, user):

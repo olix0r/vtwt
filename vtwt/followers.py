@@ -1,10 +1,8 @@
-from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
-from twittytwister.twitter import Twitter
-
-from jersey import cli, log
+from jersey import log
+from vtwt import cli
 
 
 class FollowersOptions(cli.Options):
@@ -15,16 +13,8 @@ class FollowersOptions(cli.Options):
 
 class Followers(cli.Command):
 
-    @inlineCallbacks
     def execute(self):
-        twt = Twitter(self.config.parent["user"], self.config.parent["password"])
-        followers = []
-        try:
-            yield twt.list_followers(followers.append)
-            self._printFollowers(followers)
-
-        except:
-            log.err()
+        return self.vtwt.getFollowers().addCallback(self._printFollowers)
 
 
     def _printFollowers(self, followers):

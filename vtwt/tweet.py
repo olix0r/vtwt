@@ -2,9 +2,8 @@ from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
-from jersey import cli, log
-
-from twittytwister.twitter import Twitter
+from jersey import log
+from vtwt import cli
 
 
 class TweetOptions(cli.Options):
@@ -19,11 +18,12 @@ class Tweeter(cli.Command):
 
     @inlineCallbacks
     def execute(self):
-        twt = Twitter(self.config.parent["user"], self.config.parent["password"])
-        
         text = self.config["tweet"]
-        msg = yield twt.update(text)
-        print "@{0} {1}".format(self.config.parent["user"], text)
+        try:
+            msg = yield self.vtwt.update(text)
+        except Exception, e:
+            log.error(str(e))
+        print "{0}\t{1}".format(self.config.parent["user"], text)
 
 
 

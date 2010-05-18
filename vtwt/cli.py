@@ -1,5 +1,3 @@
-#!/usr/bin/env python2.6
-
 import os, sys
 
 from twisted.internet import reactor
@@ -7,6 +5,28 @@ from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.python.filepath import FilePath
 
 from jersey import cli, log
+
+from vtwt.svc import VtwtService
+
+
+class Options(cli.Options):
+    pass
+
+
+class Command(cli.Command):
+
+    def __init__(self, config):
+        cli.Command.__init__(self, config)
+
+        svc = VtwtService(config.parent["user"], config.parent["password"])
+        svc.setName("vtwt")
+        svc.setServiceParent(self)
+        self.vtwt = svc
+
+
+class CommandFactory(cli.CommandFactory):
+    pass
+
 
 
 class VtwtOptions(cli.PluggableOptions):

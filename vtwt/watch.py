@@ -6,11 +6,8 @@ from twisted.internet.error import DNSLookupError
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
-from jersey import cli, log
-
-from twittytwister.twitter import Twitter
-
-from vtwt.util import decodeText
+from jersey import log
+from vtwt import cli
 
 
 class WatchOptions(cli.Options):
@@ -21,24 +18,12 @@ class WatchOptions(cli.Options):
             ["interval", "i", None, "Time between requests", int],
         ]
 
-    def parseArgs(self, *keywords):
-        self["keywords"] = keywords
-
 
 class Watcher(cli.Command):
 
     def execute(self):
-        self.twt = Twitter(self.config.parent["user"], self.config.parent["password"])
-        self._maxId = None
-
-        if not self.config["keywords"]:
-            func = self.showHome
-        
-        else:
-            raise RuntimeError("Oops.")
-
         if self.config["interval"]:
-            svc = TimerService(self.config["interval"], func)
+            svc = TimerService(self.config["interval"], self.showHome)
             svc.setServiceParent(self)
 
             # Since this runs ~forever, just return a Deferred that doesn't call
@@ -46,28 +31,19 @@ class Watcher(cli.Command):
             d = Deferred()
 
         else:
-            d = func()
+            # Print it once and exit
+            d = self.showHome()
 
         return d
 
 
     @inlineCallbacks
     def showHome(self):
-        params = dict()
-        if self._maxId:
-            params["since_id"] = self._maxId
-        self._msgBuffer = []
         try:
-            yield self.twt.home_timeline(self.cb_gotMsg, params)
+            messages = yield self.vtwt.getTimelineUpdates()
+            self._printMessages(messages)
         except Exception, e:
             print >>sys.stderr, str(e)
-        else:
-            self._printMessages(self._msgBuffer)
-
-
-    def cb_gotMsg(self, msg):
-        msg.text = decodeText(msg.text)
-        self._msgBuffer.insert(0, msg)
 
 
     def _printMessages(self, messages):
@@ -81,8 +57,6 @@ class Watcher(cli.Command):
 
     def _printMessage(self, msg):
         print "{0.user.screen_name:14}  {0.text}".format(msg)
-        if self._maxId is None or self._maxId < msg.id:
-            self._maxId = msg.id
 
 
 
