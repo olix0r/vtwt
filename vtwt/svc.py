@@ -46,14 +46,18 @@ class VtwtService(Service):
     def follow(self, user):
         users = []
         yield self._twt.follow_user(user, users.append)
-        return users[0]
+        returnValue(users[0])
 
 
     @inlineCallbacks
     def unfollow(self, user):
         users = []
         yield self._twt.unfollow_user(user, users.append)
-        return users[0]
+        returnValue(users[0])
+
+
+    def block(self, user):
+        return self._twt.block(user)
 
 
     @inlineCallbacks
