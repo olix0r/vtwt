@@ -91,8 +91,8 @@ class Watcher(cli.Command):
         width = os.getenv("COLUMNS", 80)
 
         if self.config["long"]:
-            fmt = "--- {0.user.screen_name:15} {0.created_at} [{0.id}]\n{1}"
-            joiner = "\n"
+            fmt = "--- {0.user.screen_name:15} {0.created_at} [{0.id}]\n    {1}"
+            joiner = "\n    "
 
         else:
             fmt = "{0.user.screen_name:15} {1}"
