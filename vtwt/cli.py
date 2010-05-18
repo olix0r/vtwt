@@ -33,6 +33,10 @@ class VtwtOptions(cli.PluggableOptions):
 
     defaultSubCommand = "watch"
 
+    optFlags = [
+            ["debug", "D", "Turn debugging messages on",]
+        ]
+
     optParameters = [
             ["config-file", "c",
                 os.path.expanduser("~/.vtwtrc"), "Vtwt config file",],
@@ -48,7 +52,10 @@ class VtwtOptions(cli.PluggableOptions):
 
 
     def postOptions(self):
-        self.logLevel = log.ERROR+1  # IGNORE ~all log messages.
+        if self["debug"]:
+            self.logLevel = log.TRACE  # Allow all log messages.
+        else:
+            self.logLevel = log.ERROR+1  # Ignore ~all log messages.
 
         cf = FilePath(self["config-file"])
         if cf.exists():
