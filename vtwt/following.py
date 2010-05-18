@@ -14,7 +14,7 @@ class FollowingOptions(cli.Options):
 class Following(cli.Command):
 
     def execute(self):
-        return self.vtwt.getFollowed().addCallback(self._printFriends)
+        return self.vtwt.getFollowees().addCallback(self._printFriends)
 
 
     def _printFriends(self, friends):

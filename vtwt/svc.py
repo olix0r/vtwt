@@ -10,28 +10,30 @@ from twittytwister.twitter import TwitterFeed
 from vtwt.util import decodeText
 
 
+
 class VtwtService(Service):
 
     def __init__(self, user, password):
-        self._twt = TwitterFeed(user, password)
+        self._twt = self._buildTwitterClient(user, password)
         self._mostRecentId = None
 
 
+    def _buildTwitterClient(self, user, password):
+        return TwitterFeed(user, password)
+
+
     @inlineCallbacks
-    def getTimelineUpdates(self, sinceId=None):
-        params = {}
-        if sinceId:
-            params["since_id"] = sinceId
+    def getTimelineUpdates(self, params={}):
+        """Get recent updates from the user's home timeline.
+        """
         if self._mostRecentId:
-            params["since_id"] = self._mostRecentId
+            params.setdefault("since_id", self._mostRecentId)
 
         messages = []
         yield self._twt.home_timeline(lambda m: messages.insert(0, m), params)
-
         for msg in messages:
             msg.text = decodeText(msg.text)
-        if messages:
-            self._mostRecentId = messages[-1].id
+            self._mostRecentId = msg.id
 
         returnValue(messages)
 
@@ -40,18 +42,18 @@ class VtwtService(Service):
         return self._twt.update(text)
 
 
-    def follow(self, users):
-        d = Deferred()
-        self._twt.follow_user(self.config["friend"],
-                d.callback).addErrback(d.errback)
-        return d
+    @inlineCallbacks
+    def follow(self, user):
+        users = []
+        yield self._twt.follow_user(user, users.append)
+        return users[0]
 
 
-    def unfollow(self, users):
-        d = Deferred()
-        self._twt.unfollow_user(self.config["friend"],
-                d.callback).addErrback(d.errback)
-        return d
+    @inlineCallbacks
+    def unfollow(self, user):
+        users = []
+        yield self._twt.unfollow_user(user, users.append)
+        return users[0]
 
 
     @inlineCallbacks
@@ -62,7 +64,7 @@ class VtwtService(Service):
 
 
     @inlineCallbacks
-    def getFollowed(self, user=None):
+    def getFollowees(self, user=None):
         followees = []
         yield self._twt.list_friends(lambda f: followees.insert(0, f), user)
         returnValue(followees)
