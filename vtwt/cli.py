@@ -68,9 +68,10 @@ class VtwtOptions(cli.PluggableOptions):
     def readConfigFile(self, configFile):
         fileNS = {}
         execfile(configFile.path, fileNS)
-        for k in fileNS:
+        for configKey in fileNS:
+            k = configKey.replace("_", "-")
             if k in self and self[k] is None:
-                self[k] = fileNS[k]
+                self[k] = fileNS[confKey]
 
 
 
