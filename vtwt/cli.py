@@ -71,7 +71,7 @@ class VtwtOptions(cli.PluggableOptions):
         for configKey in fileNS:
             k = configKey.replace("_", "-")
             if k in self and self[k] is None:
-                self[k] = fileNS[confKey]
+                self[k] = fileNS[configKey]
 
 
 
