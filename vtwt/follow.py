@@ -1,3 +1,6 @@
+import sys
+
+from twisted.internet.defer import inlineCallbacks
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
@@ -7,19 +10,28 @@ from vtwt import cli
 
 class FollowOptions(cli.Options):
 
-    def parseArgs(self, name):
-        self["friend"] = name
+    def parseArgs(self, *names):
+        if not names:
+            raise usage.error("No one to follow ;(")
+        self["friends"] = names
 
 
 class Follower(cli.Command):
 
+    @inlineCallbacks
     def execute(self):
-        return self.vtwt.follow(self.config["friend"]).addCallback(self._befriended)
+        users = []
+        for friend in self.config["friends"]:
+            try:
+                user = yield self.vtwt.follow(friend)
+                self._printFollowee(user)
+
+            except Exception, e:
+                print >>sys.stderr, repr(e)
 
 
-    def _befriended(self, user):
-        print "{self.config[user]}: {user.screen_name}".format(
-            self=self, user=user)
+    def _printFollowee(self, user):
+        print "{u.screen_name}".format(c=self.config, u=user)
 
 
 
