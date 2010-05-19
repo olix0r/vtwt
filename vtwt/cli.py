@@ -19,7 +19,6 @@ class Command(cli.Command):
         cli.Command.__init__(self, config)
 
         svc = VtwtService(config.parent["user"], config.parent["password"])
-        svc.setName("vtwt")
         svc.setServiceParent(self)
         self.vtwt = svc
 
@@ -73,9 +72,9 @@ class VtwtOptions(cli.PluggableOptions):
 
 
     def readConfigFile(self, configFile):
-        fileNS = {}
+        fileNS = dict()
         execfile(configFile.path, fileNS)
-        for configKey in fileNS:
+        for configKey in fileNS.iterkeys():
             k = configKey.replace("_", "-")
             if k in self and self[k] is None:
                 self[k] = fileNS[configKey]
@@ -85,6 +84,7 @@ class VtwtOptions(cli.PluggableOptions):
 class VtwtCommander(cli.PluggableCommandRunner):
 
     def preApplication(self):
+        # twittytwister.txml raises a weird Exception.  Suppress it.
         import logging
         logging.raiseExceptions = False
 
