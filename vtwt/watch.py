@@ -2,7 +2,6 @@ import os, sys, time
 
 from twisted.application.internet import TimerService
 from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
-from twisted.internet.error import DNSLookupError
 from twisted.plugin import IPlugin
 from twisted.python.text import greedyWrap
 from zope.interface import implements
@@ -24,6 +23,13 @@ class WatchOptions(cli.Options):
         ]
 
 
+    def parseArgs(self, watchee="home"):
+        self["watchee"] = watchee
+
+    def postOptions(self):
+        log.debug("Going to watch {0[watchee]} ")
+
+
 class Watcher(cli.Command):
 
     def execute(self):
@@ -31,7 +37,7 @@ class Watcher(cli.Command):
 
         self._lastPrintedId = None
         if self.config["interval"]:
-            svc = TimerService(self.config["interval"], self.showHome)
+            svc = TimerService(self.config["interval"], self.showTimeline)
             svc.setServiceParent(self)
 
             # Since this runs ~forever, just return a Deferred that doesn't call
@@ -40,27 +46,34 @@ class Watcher(cli.Command):
 
         else:
             # Print it once and exit
-            d = self.showHome()
+            d = self.showTimeline()
 
         return d
 
 
     @inlineCallbacks
-    def showHome(self):
-        params = dict()
-        if self._lastPrintedId:
-            params = {"since_id": self._lastPrintedId, }
-            log.trace("Requesting new messages")
-        else:
-            log.trace("Requesting all messages")
-
+    def showTimeline(self):
         try:
-            messages = yield self.vtwt.getTimelineUpdates(params)
-            self._printMessages(messages)
+            log.debug(("Requesting {0.config[watchee]} timeline since "
+                       "{0._lastPrintedId}").format(self))
+            watchee = self.config["watchee"]
+            params = dict()
 
-        except Exception, e:
+            if self._lastPrintedId:
+                params["since_id"] = self._lastPrintedId
+
+            if watchee == "home":
+                messages = yield self.vtwt.getHomeTimeline(params)
+            else:
+                messages = yield self.vtwt.getUserTimeline(watchee, params)
+
+            messages = self._limitMessages(messages, self.config["limit"])
+            if messages:
+                self._printMessages(messages)
+
+        except:
             from traceback import print_exc
-            print >>sys.stderr, print_exc(e)
+            print >>sys.stderr, print_exc()
 
 
     @staticmethod
@@ -73,33 +86,38 @@ class Watcher(cli.Command):
 
 
     def _printMessages(self, messages):
-        for msg in self._limitMessages(messages, self.config["limit"]):
-            try:
-                self._printMessage(msg)
-            except UnicodeEncodeError, uee:
-                # Ignore messages with Unicode errors.  Sahri Charlie.
-                log.warn("Unicode error printing message {0.id}".format(msg))
-            else:
-                self._lastPrintedId = msg.id
+        screenNameWidth = max(len(msg.user.screen_name) for msg in messages)
+        for msg in messages:
+            self._printMessage(msg, screenNameWidth)
 
         if messages and self.config["interval"] and not self.config["long"]:
             self._printTimestamp()
 
 
-    def _printMessage(self, msg):
-        log.trace("Formatting {0.id}".format(msg))
-        width = os.getenv("COLUMNS", 80)
-
+    def _printMessage(self, msg, screenNameWidth=14):
         if self.config["long"]:
-            fmt = "--- {0.user.screen_name:15} {0.created_at} [{0.id}]\n    {1}"
-            joiner = "\n    "
+            fmt = "--- {0.user.screen_name:{2}} {0.created_at} [{0.id}]\n" \
+                  "    {1}"
+            paddingLen = 4
 
         else:
-            fmt = "{0.user.screen_name:15} {1}"
-            joiner = "\n" + (" "*16)
+            fmt = "{0.user.screen_name:{2}}  {1}"
+            paddingLen = screenNameWidth + 2
 
+        width = int(os.getenv("COLUMNS", 80)) - paddingLen
+
+        log.trace("Formatting {0} at {1} characters.".format(
+                "long message" if self.config["long"] else "message",
+                width))
+        joiner = "\n" + (" " * paddingLen)
         text = joiner.join(greedyWrap(msg.text, width))
-        print fmt.format(msg, text)
+        try:
+            print fmt.format(msg, text, screenNameWidth)
+        except UnicodeEncodeError, uee:
+            # Ignore messages with Unicode errors.  Sahri Charlie.
+            log.warn("Unicode error printing message {0.id}".format(msg))
+        else:
+            self._lastPrintedId = msg.id
 
 
     @staticmethod
