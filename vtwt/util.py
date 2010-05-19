@@ -8,6 +8,7 @@ _HTMLENT_CODEPOINT_RE =  re.compile('&({0}|#\d+);'.format(
         '|'.join(name2codepoint.keys())))
 
 def recodeText(text):
+    """Parses things like &amp; and &#8020; into real characters."""
     def _entToUnichr(match):
         ent = match.group(1)
         try:
