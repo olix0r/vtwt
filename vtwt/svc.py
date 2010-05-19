@@ -13,9 +13,10 @@ from vtwt.util import recodeText
 
 class VtwtService(Service):
 
+    name = "vtwt"
+
     def __init__(self, user, password):
         self._twt = self._buildTwitterClient(user, password)
-        self._mostRecentId = None
 
 
     def _buildTwitterClient(self, user, password):
@@ -23,19 +24,43 @@ class VtwtService(Service):
 
 
     @inlineCallbacks
-    def getTimelineUpdates(self, params={}):
-        """Get recent updates from the user's home timeline.
+    def getHomeTimeline(self, params={}):
+        """Get recent updates from a user's timeline.
         """
-        if self._mostRecentId:
-            params.setdefault("since_id", self._mostRecentId)
+        log.trace("Getting home timeline.")
 
         messages = []
         yield self._twt.home_timeline(lambda m: messages.insert(0, m), params)
+
         for msg in messages:
-            msg.text = recodeText(msg.text)
-            self._mostRecentId = msg.id
+            msg.text = self._recodeText(msg.text)
 
         returnValue(messages)
+
+
+    @inlineCallbacks
+    def getUserTimeline(self, user, params={}):
+        """Get recent updates from the user's home timeline.
+        """
+        log.trace("Getting timeline for {0}".format(user))
+
+        messages = []
+        yield self._twt.user_timeline(lambda m: messages.insert(0, m),
+                user, params)
+
+        for msg in messages:
+            msg.text = self._recodeText(msg.text)
+
+        returnValue(messages)
+
+
+    def _recodeText(self, text):
+        """Recode HTML entities refs; e.g. '&amp;' to '&'
+        
+        Work around buggy Twitter clients that mangle retweets such that
+        &amp;lt;3 recodes to <3 (instead of &lt;3).
+        """
+        return recodeText(recodeText(text))
 
 
     def tweet(self, text):
