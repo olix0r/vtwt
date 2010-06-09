@@ -25,12 +25,9 @@ class Tweeter(cli.Command):
             wrapped = self._wrapText(text, len(str(msgId)))
             print "{0}  {1}".format(msgId, wrapped)
 
-        except whale.Error, we:
-            print >>sys.stderr, whale.fail(int(we.status))
-            raise SystemError(1)
-
         except Exception, e:
-            log.error(repr(e))
+            print >>sys.stderr, whale.fail(e)
+
 
 
     def _wrapText(self, text, paddingLen):

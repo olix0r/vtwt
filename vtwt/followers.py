@@ -19,14 +19,11 @@ class Followers(cli.Command):
         try:
             followers = yield self.vtwt.getFollowers()
 
-        except whale.Error, we:
-            print >>sys.stderr, whale.fail(int(we.status))
-            raise SystemError(1)
-
         except Exception, e:
-            print >>sys.stderr, repr(e)
+            print >>sys.stderr, whale.fail(e)
 
-        self._printFollowers(followers)
+        else:
+            self._printFollowers(followers)
 
 
     def _printFollowers(self, followers):

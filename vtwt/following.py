@@ -22,12 +22,10 @@ class Following(cli.Command):
             friends = yield self.vtwt.getFollowees()
             self._printFriends(friends)
 
-        except whale.Error, we:
-            print >>sys.stderr, whale.fail(int(we.status))
+        except Exception, e:
+            print >>sys.stderr, whale.fail(e)
             raise SystemError(1)
 
-        except Exception, e:
-            print >>sys.stderr, repr(e)
 
 
     def _printFriends(self, friends):

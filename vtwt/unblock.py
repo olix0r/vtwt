@@ -25,11 +25,9 @@ class UnBlocker(cli.Command):
             try:
                 yield self._unblock(unblockee)
 
-            except whale.Error, we:
-                print >>sys.stderr, whale.fail(int(we.status))
-
             except Exception, e:
-                print >>sys.stderr, repr(e)
+                print >>sys.stderr, whale.fail(e)
+
 
 
     @inlineCallbacks

@@ -26,11 +26,9 @@ class Follower(cli.Command):
                 user = yield self.vtwt.follow(friend)
                 self._printFollowee(user)
 
-            except whale.Error, we:
-                print >>sys.stderr, whale.fail(int(we.status))
-
             except Exception, e:
-                print >>sys.stderr, repr(e)
+                print >>sys.stderr, whale.fail(e)
+
 
 
     def _printFollowee(self, user):

@@ -25,11 +25,8 @@ class UnFollower(cli.Command):
             try:
                 user = yield self.vtwt.unfollow(loser)
 
-            except whale.Error, we:
-                print >>sys.stderr, whale.fail(int(we.status))
-
             except Exception, e:
-                print >>sys.stderr, repr(e)
+                print >>sys.stderr, whale.fail(e)
 
             else:
                 self._printLoser(loser)

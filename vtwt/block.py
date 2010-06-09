@@ -25,12 +25,8 @@ class Blocker(cli.Command):
             try:
                 yield self._block(blockee)
 
-            except whale.Error, we:
-                print >>sys.stderr, whale.fail(int(we.status))
-                raise SystemExit(1)
-
             except Exception, e:
-                print >>sys.stderr, repr(e)
+                print >>sys.stderr, whale.fail(e)
 
 
     @inlineCallbacks

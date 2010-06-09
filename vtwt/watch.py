@@ -71,13 +71,9 @@ class Watcher(cli.Command):
             if messages:
                 self._printMessages(messages)
 
-        except whale.Error, we:
-            print >>sys.stderr, whale.fail(int(we.status))
-
         except Exception, e:
-            from traceback import print_exc
-            print >>sys.stderr, "ERROR: {0!r}".format(e)
-            print >>sys.stderr, print_exc()
+            print >>sys.stderr, whale.fail(e)
+
 
 
     @staticmethod
