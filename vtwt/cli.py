@@ -37,7 +37,7 @@ class Command(cli.Command):
         if isinstance(error, WebError):
             emsg = "{0.message} {0.code}".format(error)
         else:
-            emsg = repr(error)
+            emsg = str(error)
 
         width = self.config["COLUMNS"] - self._whalePaddingLen
         lines = greedyWrap(emsg, width)
