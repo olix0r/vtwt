@@ -5,8 +5,7 @@ _WHALE_FMT = """\
    __{lines}___
 |\\/ {spaces}  X \\
 }}    {msg}    >
-|/\\_{lines}___-/
-"""
+|/\\_{lines}___-/"""
 
 def fail(error):
     if isinstance(error, Error):
