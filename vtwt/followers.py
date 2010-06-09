@@ -1,3 +1,4 @@
+from twisted.internet.defer import inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
 from zope.interface import implements
 
