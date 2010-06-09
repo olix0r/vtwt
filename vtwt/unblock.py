@@ -6,7 +6,7 @@ from twisted.python import usage
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli, whale
+from vtwt import cli
 
 
 class UnBlockOptions(cli.Options):
@@ -26,7 +26,7 @@ class UnBlocker(cli.Command):
                 yield self._unblock(unblockee)
 
             except Exception, e:
-                print >>sys.stderr, whale.fail(e)
+                print >>sys.stderr, self.failWhale(e)
 
 
 

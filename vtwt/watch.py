@@ -7,7 +7,7 @@ from twisted.python.text import greedyWrap
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli, whale
+from vtwt import cli
 
 
 class WatchOptions(cli.Options):
@@ -72,7 +72,7 @@ class Watcher(cli.Command):
                 self._printMessages(messages)
 
         except Exception, e:
-            print >>sys.stderr, whale.fail(e)
+            print >>sys.stderr, self.failWhale(e)
 
 
 

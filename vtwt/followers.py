@@ -3,7 +3,7 @@ from twisted.plugin import IPlugin
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli, whale
+from vtwt import cli
 
 
 class FollowersOptions(cli.Options):
@@ -20,7 +20,7 @@ class Followers(cli.Command):
             followers = yield self.vtwt.getFollowers()
 
         except Exception, e:
-            print >>sys.stderr, whale.fail(e)
+            print >>sys.stderr, self.failWhale(e)
 
         else:
             self._printFollowers(followers)

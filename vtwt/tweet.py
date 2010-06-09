@@ -4,7 +4,7 @@ from twisted.python.text import greedyWrap
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli, whale
+from vtwt import cli
 
 
 class TweetOptions(cli.Options):
@@ -26,7 +26,7 @@ class Tweeter(cli.Command):
             print "{0}  {1}".format(msgId, wrapped)
 
         except Exception, e:
-            print >>sys.stderr, whale.fail(e)
+            print >>sys.stderr, self.failWhale(e)
 
 
 
