@@ -4,7 +4,7 @@ from twisted.web.error import Error
 _WHALE_FMT = """\
    ________
 |\\/      X \\
- }}  {0: 3}    >
+}}   {0: 3}    >
 |/\\_______-/
 """
 
