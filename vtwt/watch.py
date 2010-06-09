@@ -7,7 +7,7 @@ from twisted.python.text import greedyWrap
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli
+from vtwt import cli, whale
 
 
 class WatchOptions(cli.Options):
@@ -71,8 +71,12 @@ class Watcher(cli.Command):
             if messages:
                 self._printMessages(messages)
 
-        except:
+        except whale.Error, we:
+            print >>sys.stderr, whale.fail(int(we.status))
+
+        except Exception, e:
             from traceback import print_exc
+            print >>sys.stderr, "ERROR: {0!r}".format(e)
             print >>sys.stderr, print_exc()
 
 
@@ -104,7 +108,7 @@ class Watcher(cli.Command):
             fmt = "{0.user.screen_name:{2}}  {1}"
             paddingLen = screenNameWidth + 2
 
-        width = int(os.getenv("COLUMNS", 80)) - paddingLen
+        width = self.config.parent["COLUMNS"] - paddingLen
 
         log.trace("Formatting {0} at {1} characters.".format(
                 "long message" if self.config["long"] else "message",

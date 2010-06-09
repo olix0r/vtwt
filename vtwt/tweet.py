@@ -1,29 +1,42 @@
 from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.plugin import IPlugin
+from twisted.python.text import greedyWrap
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli
+from vtwt import cli, whale
 
 
 class TweetOptions(cli.Options):
 
     def parseArgs(self, *tokens):
+        self["tweet"] = " ".join(tokens)
         if not tokens:
             raise cli.UsageError("Nothing to tweet.")
-        self["tweet"] = " ".join(tokens)
 
 
 class Tweeter(cli.Command):
 
     @inlineCallbacks
     def execute(self):
-        text = self.config["tweet"]
         try:
+            text = self.config["tweet"]
             msgId = yield self.vtwt.tweet(text)
-            print "{0}\t{1}".format(self.config.parent["user"], text)
+            wrapped = self._wrapText(text, len(str(msgId)))
+            print "{0}  {1}".format(msgId, wrapped)
+
+        except whale.Error, we:
+            print >>sys.stderr, whale.fail(int(we.status))
+            raise SystemError(1)
+
         except Exception, e:
-            log.error(str(e))
+            log.error(repr(e))
+
+
+    def _wrapText(self, text, paddingLen):
+        width = self.config.parent["COLUMNS"] - paddingLen
+        joiner = "\n" + str(" " * paddingLen)
+        return joiner.join(greedyWrap(text, width))
 
 
 

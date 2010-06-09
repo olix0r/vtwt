@@ -5,7 +5,7 @@ from twisted.plugin import IPlugin
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli
+from vtwt import cli, whale
 
 
 class UnFollowOptions(cli.Options):
@@ -24,10 +24,15 @@ class UnFollower(cli.Command):
         for loser in self.config["losers"]:
             try:
                 user = yield self.vtwt.unfollow(loser)
-                self._printLoser(loser)
+
+            except whale.Error, we:
+                print >>sys.stderr, whale.fail(int(we.status))
 
             except Exception, e:
                 print >>sys.stderr, repr(e)
+
+            else:
+                self._printLoser(loser)
 
 
     def _printLoser(self, user):

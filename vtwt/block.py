@@ -6,7 +6,7 @@ from twisted.python import usage
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli
+from vtwt import cli, whale
 
 
 class BlockOptions(cli.Options):
@@ -24,6 +24,10 @@ class Blocker(cli.Command):
         for blockee in self.config["blockees"]:
             try:
                 yield self._block(blockee)
+
+            except whale.Error, we:
+                print >>sys.stderr, whale.fail(int(we.status))
+                raise SystemExit(1)
 
             except Exception, e:
                 print >>sys.stderr, repr(e)

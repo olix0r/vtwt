@@ -5,7 +5,7 @@ from twisted.plugin import IPlugin
 from zope.interface import implements
 
 from jersey import log
-from vtwt import cli
+from vtwt import cli, whale
 
 
 class FollowingOptions(cli.Options):
@@ -21,6 +21,10 @@ class Following(cli.Command):
         try:
             friends = yield self.vtwt.getFollowees()
             self._printFriends(friends)
+
+        except whale.Error, we:
+            print >>sys.stderr, whale.fail(int(we.status))
+            raise SystemError(1)
 
         except Exception, e:
             print >>sys.stderr, repr(e)

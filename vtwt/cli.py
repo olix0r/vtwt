@@ -70,6 +70,8 @@ class VtwtOptions(cli.PluggableOptions):
         if not self["password"]:
             raise cli.UsageError("No password specified.")
 
+        self["COLUMNS"] = int(os.getenv("COLUMNS", 80))
+
 
     def readConfigFile(self, configFile):
         fileNS = dict()
