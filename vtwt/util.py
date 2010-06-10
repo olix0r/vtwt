@@ -37,7 +37,7 @@ _whalePaddingLen = 9
 
 def failWhale(error, columns=80):
     if isinstance(error, WebError):
-        emsg = "{0.message} {0.code}".format(error)
+        emsg = "{0.status} {0.message}".format(error)
     else:
         emsg = str(error)
 
