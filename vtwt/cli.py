@@ -3,11 +3,10 @@ import os, sys
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, inlineCallbacks, returnValue
 from twisted.python.filepath import FilePath
-from twisted.python.text import greedyWrap
-from twisted.web.error import Error as WebError
 
 from jersey import cli, log
 
+from vtwt import util
 from vtwt.svc import VtwtService
 
 
@@ -25,33 +24,8 @@ class Command(cli.Command):
         self.vtwt = svc
 
 
-    _whaleFmt = """\
-   __{lines}___
-|\\/  {spaces} X \\
-}}    {body}    |
-|/\\__{lines}__-/"""
-
-    _whalePaddingLen = 9
-
     def failWhale(self, error):
-        if isinstance(error, WebError):
-            emsg = "{0.message} {0.code}".format(error)
-        else:
-            emsg = str(error)
-
-        width = self.config["COLUMNS"] - self._whalePaddingLen
-        lines = greedyWrap(emsg, width)
-        lineLength = max(map(len, lines))
-
-        msg = "    |\n|    ".join(
-                    map(lambda l: "{0:{1}}".format(l, lineLength),
-                        lines))
-
-        return self._whaleFmt.format(
-                spaces = " "*lineLength,
-                lines = "_"*lineLength,
-                length = lineLength,
-                body = msg)
+        return util.failWhale(error, self.config["COLUMNS"]
 
 
 
