@@ -25,7 +25,7 @@ class Command(cli.Command):
 
 
     def failWhale(self, error):
-        return util.failWhale(error, self.config["COLUMNS"]
+        return util.failWhale(error, self.config["COLUMNS"])
 
 
 
