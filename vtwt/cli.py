@@ -25,7 +25,11 @@ class Command(cli.Command):
 
 
     def failWhale(self, error):
-        return util.failWhale(error, self.config["COLUMNS"])
+        config = self.config
+        while config.parent and "COLUMNS" not in config:
+            config = config.parent
+        columns = config.get("COLUMNS", 80)
+        return util.failWhale(error, columns)
 
 
 
@@ -105,18 +109,16 @@ def run(args=sys.argv[:]):
     opts = VtwtOptions(program)
     try:
         opts.parseOptions()
-        VtwtCommander(program, opts).run()
+
+        vtwt = VtwtCommander(program, opts)
+        vtwt.run()
 
     except cli.UsageError, ue:
         print >>sys.stderr, str(opts)
         print >>sys.stderr, str(ue)
         raise SystemExit(os.EX_USAGE)
 
-    except SystemExit, ex:
-        raise ex
-
-    except Exception, e:
-        print >>sys.stderr, str(e)
-        raise SystemExit(1)
+    else:
+        raise SystemExit(vtwt.exitValue)
 
 
