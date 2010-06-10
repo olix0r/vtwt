@@ -20,7 +20,7 @@ vtwt installs using a standard Python distutils setup.py:
 
 vtwt(1) reads a configuration file (~//vtwtrc, by default; specified with the
 --config-file option) that is used to set configuration values that are
-otherwise passed to the command-line.  This file may contain arbtray Python:
+otherwise passed to the command-line.  This file may contain arbitrary Python:
 
   import hashlib
   user = "0b0t"
