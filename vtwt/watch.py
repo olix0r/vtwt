@@ -36,6 +36,7 @@ class Watcher(cli.Command):
         log.trace("Executing watcher.")
 
         self._lastPrintedId = None
+        self._lastError = None
         if self.config["interval"]:
             svc = TimerService(self.config["interval"], self.showTimeline)
             svc.setServiceParent(self)
@@ -72,8 +73,12 @@ class Watcher(cli.Command):
                 self._printMessages(messages)
 
         except Exception, e:
-            print >>sys.stderr, self.failWhale(e)
+            if self._lastError != e:
+                print >>sys.stderr, self.failWhale(e)
+                self._lastError = e
 
+        else:
+            self._lastError = None
 
 
     @staticmethod
