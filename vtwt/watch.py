@@ -63,20 +63,17 @@ class Watcher(cli.Command):
             if self._lastPrintedId:
                 params["since_id"] = self._lastPrintedId
 
-            if watchee == "home":
-                messages = yield self.vtwt.getHomeTimeline(params)
-            else:
-                messages = yield self.vtwt.getUserTimeline(watchee, params)
+            messages = yield self.vtwt.getTimeline(watchee, params)
 
             messages = self._limitMessages(messages, self.config["limit"])
             if messages:
                 self._printMessages(messages)
+                self._lastPrintedId = messages[-1].id
 
         except Exception, e:
-            if self._lastError != e:
+            if repr(self._lastError) != repr(e):
                 print >>sys.stderr, self.failWhale(e)
                 self._lastError = e
-
         else:
             self._lastError = None
 
@@ -121,8 +118,6 @@ class Watcher(cli.Command):
         except UnicodeEncodeError, uee:
             # Ignore messages with Unicode errors.  Sahri Charlie.
             log.warn("Unicode error printing message {0.id}".format(msg))
-        else:
-            self._lastPrintedId = msg.id
 
 
     @staticmethod

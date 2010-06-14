@@ -13,9 +13,9 @@ from vtwt.util import recodeText
 
 class VtwtService(Service):
 
-    name = "vtwt"
-
     def __init__(self, user, password):
+        self.name = "vtwt:{0}".format(user)
+        self.user = user
         self._twt = self._buildTwitterClient(user, password)
 
 
@@ -24,32 +24,20 @@ class VtwtService(Service):
 
 
     @inlineCallbacks
-    def getHomeTimeline(self, params={}):
+    def getTimeline(self, user=None, params={}):
         """Get recent updates from a user's timeline.
         """
         log.trace("Getting home timeline.")
 
         messages = []
-        yield self._twt.home_timeline(lambda m: messages.insert(0, m), params)
-
-        for msg in messages:
+        def addMessage(msg):
             msg.text = self._recodeText(msg.text)
+            messages.insert(0, msg)
 
-        returnValue(messages)
-
-
-    @inlineCallbacks
-    def getUserTimeline(self, user, params={}):
-        """Get recent updates from the user's home timeline.
-        """
-        log.trace("Getting timeline for {0}".format(user))
-
-        messages = []
-        yield self._twt.user_timeline(lambda m: messages.insert(0, m),
-                user, params)
-
-        for msg in messages:
-            msg.text = self._recodeText(msg.text)
+        if user in (None, "home"):
+            yield self._twt.home_timeline(addMessage, params)
+        else:
+            yield self._twt.user_timeline(addMessage, user, params)
 
         returnValue(messages)
 
@@ -69,6 +57,8 @@ class VtwtService(Service):
 
     @inlineCallbacks
     def follow(self, user):
+        """Follow a user.  Return a dictionary representing the user.
+        """
         users = []
         yield self._twt.follow_user(user, users.append)
         returnValue(users[0])
@@ -76,21 +66,30 @@ class VtwtService(Service):
 
     @inlineCallbacks
     def unfollow(self, user):
+        """Unfollow a user.  Return a dictionary representing the user.
+        """
         users = []
         yield self._twt.unfollow_user(user, users.append)
         returnValue(users[0])
 
 
     def block(self, user):
+        """Block a user.
+        """
+        users = []
         return self._twt.block(user)
 
 
     def unblock(self, user):
+        """Unblock a user.
+        """
         return self._twt.unblock(user)
 
 
     @inlineCallbacks
     def getFollowers(self, user=None):
+        """Get a list of followers (optionally, for another user).
+        """
         followers = []
         yield self._twt.list_followers(lambda f: followers.insert(0, f), user)
         returnValue(followers)
@@ -98,6 +97,8 @@ class VtwtService(Service):
 
     @inlineCallbacks
     def getFollowees(self, user=None):
+        """Get a list of users following 
+        """
         followees = []
         yield self._twt.list_friends(lambda f: followees.insert(0, f), user)
         returnValue(followees)
