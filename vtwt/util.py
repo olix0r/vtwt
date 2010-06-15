@@ -28,12 +28,12 @@ def recodeText(text):
 
 
 _whaleFmt = """\
-   __{lines}___
-|\\/  {spaces} X \\
-}}    {body}    |
-|/\\__{lines}__-/"""
+   _{lines}__
+|\\/{space} x \\
+}}   {body}   |
+|/\\{lines}__-/"""
 
-_whalePaddingLen = 9
+_whalePaddingLen = 6
 
 def failWhale(error, columns=80):
     if isinstance(error, WebError):
@@ -47,12 +47,12 @@ def failWhale(error, columns=80):
         lines.extend(greedyWrap(line, width))
     lineLength = max(map(len, lines))
 
-    msg = "    |\n|    ".join(
+    msg = "{0}|\n|{0}".format((_whalePaddingLen/2)*" ").join(
                 map(lambda l: "{0:{1}}".format(l, lineLength),
                     lines))
 
     return _whaleFmt.format(
-            spaces = " "*lineLength,
+            space = " "*lineLength,
             lines = "_"*lineLength,
             length = lineLength,
             body = msg)
